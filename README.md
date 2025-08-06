@@ -1,158 +1,100 @@
 # Medical Insurance Cost Prediction
 
-This project presents a machine learning solution to predict medical insurance charges based on personal attributes such as age, BMI, gender, smoking status, and geographical region. By leveraging statistical learning and regression techniques, the model provides accurate cost estimations to support insurance risk assessment, personal budgeting, and healthcare analytics.
+This repository contains a machine learning project that predicts medical insurance costs based on user inputs such as age, gender, BMI, number of children, smoking status, and region.
 
----
+## Features
 
-## Project Objectives
+* Implements multiple machine learning models:
 
-The primary objective is to develop a regression-based predictive model that estimates individual medical insurance costs using structured health and demographic data. The project also explores the relative impact of various features—such as smoking habits and BMI—on healthcare expenses.
+  * Linear Regression
+  * Random Forest Regressor
+  * Decision Tree Regressor
+* Provides a user-friendly Streamlit web interface to interact with the models.
+* Exposes a RESTful API to make predictions using the trained models.
 
----
-
-## Repository Contents
+## Project Structure
 
 ```
-Medical-Insurance-Cost-Prediction/
-├── insurance.csv                           # Dataset for training and evaluation
-├── Medical_Insurance_Cost_Prediction.ipynb # End-to-end implementation in Jupyter Notebook
-├── Major (3).pdf                           # Formal project report
-├── README.md                               # Project documentation (this file)
+├── app.py                  # Streamlit app interface
+├── main.py                 # Core logic and model loading
+├── api.py                  # RESTful API using FastAPI
+├── model/                  # Directory containing trained model pickle files
+│   ├── linear_model.pkl
+│   ├── random_model.pkl
+│   └── descision_model.pkl
+├── static/                 # Any frontend assets if needed
+├── requirements.txt        # Python dependencies
+└── README.md
 ```
 
----
+## Installation
 
-## Dataset Overview
+1. Clone the repository:
 
-The dataset consists of 1,300+ observations with the following attributes:
+```bash
+git clone https://github.com/pranjaykumar926/Medical-Insurance-Cost-Prediction.git
+cd Medical-Insurance-Cost-Prediction
+```
 
-| Feature    | Description                                     |
-| ---------- | ----------------------------------------------- |
-| `age`      | Age of the individual                           |
-| `sex`      | Gender (male/female)                            |
-| `bmi`      | Body Mass Index                                 |
-| `children` | Number of dependent children                    |
-| `smoker`   | Smoking status (yes/no)                         |
-| `region`   | Residential region in the United States         |
-| `charges`  | Annual medical insurance cost (target variable) |
+2. Install dependencies:
 
----
+```bash
+pip install -r requirements.txt
+```
 
-## Methodology
+## Running the Streamlit App
 
-### Data Exploration
+```bash
+streamlit run app.py
+```
 
-* Assessment of null values and data types
-* Statistical summaries and distribution analysis
-* Outlier detection using boxplots (especially for smoking status)
-* Correlation matrix to evaluate feature relevance
+## Running the API Server
 
-### Model Implementation
+```bash
+uvicorn api:app --reload
+```
 
-Several supervised regression algorithms were implemented:
+The API will be available at `http://127.0.0.1:8000` with automatic documentation at `http://127.0.0.1:8000/docs` (Swagger UI).
 
-* **Linear Regression**
-* **Lasso Regression**
-* **Polynomial Regression** (to model non-linear relationships)
-* **Random Forest Regressor**
+## API Endpoints
 
-> The most effective model achieved an **R² score exceeding 0.85**, indicating strong predictive performance.
+### GET `/`
 
-### Evaluation Metrics
+Returns a welcome message.
 
-Model performance was assessed using the following metrics:
+### POST `/predict`
 
-* R² Score (Coefficient of Determination)
-* Mean Absolute Error (MAE)
-* Mean Squared Error (MSE)
-* Root Mean Squared Error (RMSE)
-* K-Fold Cross-Validation for generalizability
+Accepts JSON input and returns the predicted insurance cost.
 
----
+**Input JSON:**
 
-## Technology Stack
+```json
+{
+  "age": 29,
+  "sex": "male",
+  "bmi": 27.9,
+  "children": 0,
+  "smoker": "yes",
+  "region": "southwest",
+  "model": "linear"
+}
+```
 
-* **Language:** Python 3.8+
-* **Libraries:**
+**Supported model values:** `linear`, `random`, `descision`
 
-  * Data manipulation: `pandas`, `numpy`
-  * Visualization: `matplotlib`, `seaborn`
-  * Machine learning: `scikit-learn`
-* **Environment:** Jupyter Notebook
+**Output JSON:**
 
----
-
-## Use Cases
-
-This predictive model has applications in:
-
-* **Insurance underwriting**: Assisting insurance companies in calculating fair premiums.
-* **Personal finance**: Enabling individuals to estimate potential healthcare costs.
-* **Healthcare analytics**: Supporting research into cost-driving factors in health expenditures.
-
----
-
-## Visual Outputs
-
-Included visualizations:
-
-* Correlation heatmaps to identify key drivers of cost
-* Distribution and density plots for numeric features
-* Boxplots to highlight cost differences between smokers and non-smokers
-* Actual vs. predicted charge comparison plots
-
----
-
-## Setup Instructions
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/pranjaykumar926/Medical-Insurance-Cost-Prediction.git
-   cd Medical-Insurance-Cost-Prediction
-   ```
-
-2. **Install required packages**
-
-   It is recommended to use a virtual environment:
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate      # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-   *(Alternatively, manually install: pandas, numpy, matplotlib, seaborn, scikit-learn, jupyter)*
-
-3. **Launch Jupyter Notebook**
-
-   ```bash
-   jupyter notebook Medical_Insurance_Cost_Prediction.ipynb
-   ```
-
----
-
-## Future Work
-
-* Integration of deep learning models for improved non-linear representation
-* Deployment via Flask or Streamlit as an interactive web application
-* Extension into mobile platforms for broader accessibility
-
----
+```json
+{
+  "prediction": 16884.92
+}
+```
 
 ## Author
 
-**Pranjay Kumar**
-GitHub: [@pranjaykumar926](https://github.com/pranjaykumar926)
+Pranjay Kumar
+[GitHub](https://github.com/pranjaykumar926)
 
 ---
 
-## License
-
-This project is available under the [MIT License](LICENSE).
-
----
-
-## Contributions & Feedback
-
-Feedback and contributions are welcome. Please open an issue or submit a pull request for enhancements.
+Feel free to fork this repository and contribute to the project.
