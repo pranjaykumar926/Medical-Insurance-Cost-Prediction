@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import requests
 
-# Replace with your deployed API URL
-API_URL = "http://127.0.0.1:8000/predict_all"
+# API endpoint for your deployed FastAPI service
+API_URL = "https://medical-insurance-cost-prediction-yaue.onrender.com/predict_all"
 
 st.set_page_config(page_title="Medical Insurance Cost Prediction", page_icon="💊", layout="centered")
 st.title('💊 Medical Insurance Cost Prediction')
@@ -31,7 +31,8 @@ if st.button('🔍 Predict Insurance Cost'):
         "region": region
     }
     try:
-        response = requests.post(API_URL, json=payload)
+        with st.spinner('Predicting...'):
+            response = requests.post(API_URL, json=payload)
         if response.status_code == 200:
             results = response.json()
             results_df = pd.DataFrame(list(results.items()), columns=["Model", "Predicted Cost ($)"])
