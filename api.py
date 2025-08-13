@@ -1,14 +1,13 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
 import joblib
-import os
 
-# Load all models once at startup
+# Load all models at startup
 models = {
-    "linear_regression": joblib.load("linear_regression.pkl"),
-    "random_forest": joblib.load("random_forest.pkl"),
-    "decision_tree": joblib.load("decision_tree.pkl")
+    "Linear Regression": joblib.load("linear_regression.pkl"),
+    "Random Forest": joblib.load("random_forest.pkl"),
+    "Decision Tree": joblib.load("decision_tree.pkl")
 }
 
 app = FastAPI(title="Medical Insurance Prediction API (All Models)")
@@ -21,26 +20,25 @@ class InsuranceInput(BaseModel):
     smoker: str     # 'yes' or 'no'
     region: str     # 'northeast', 'northwest', 'southeast', 'southwest'
 
-def preprocess(input_data: InsuranceInput):
-    sex = 1 if input_data.sex.lower() == 'male' else 0
-    smoker = 1 if input_data.smoker.lower() == 'yes' else 0
+# Preprocessing — matches training encoding
+def preprocess(age, sex, bmi, children, smoker, region):
+    sex = 0 if sex.lower() == 'male' else 1
+    smoker = 1 if smoker.lower() == 'yes' else 0
 
-    region_map = {
-        'northeast': [1, 0, 0, 0],
-        'northwest': [0, 1, 0, 0],
-        'southeast': [0, 0, 1, 0],
-        'southwest': [0, 0, 0, 1],
-    }
-    region_encoded = region_map.get(input_data.region.lower(), [0, 0, 0, 0])
+    region_northwest = 1 if region.lower() == 'northwest' else 0
+    region_southeast = 1 if region.lower() == 'southeast' else 0
+    region_southwest = 1 if region.lower() == 'southwest' else 0
 
     features = [
-        input_data.age,
-        input_data.bmi,
-        input_data.children,
+        age,
         sex,
-        smoker
-    ] + region_encoded
-
+        bmi,
+        children,
+        smoker,
+        region_northwest,
+        region_southeast,
+        region_southwest
+    ]
     return np.array([features])
 
 @app.get("/")
@@ -50,14 +48,11 @@ def home():
         "available_models": list(models.keys())
     }
 
-@app.post("/predict")
-def predict(data: InsuranceInput, model: str = Query("random_forest", enum=models.keys())):
+@app.post("/predict_all")
+def predict_all(data: InsuranceInput):
     try:
-        input_array = preprocess(data)
-        prediction = models[model].predict(input_array)[0]
-        return {
-            "model_used": model,
-            "predicted_insurance_cost": round(float(prediction), 2)
-        }
+        input_array = preprocess(data.age, data.sex, data.bmi, data.children, data.smoker, data.region)
+        results = {name: round(float(model.predict(input_array)[0]), 2) for name, model in models.items()}
+        return results
     except Exception as e:
         return {"error": str(e)}
